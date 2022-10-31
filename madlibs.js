@@ -27,8 +27,43 @@
  * Please go through this lesson: https://www.freecodecamp.org/learn/javascript-algorithms-and-data-structures/regular-expressions/
  */
 function parseStory(rawStory) {
+  // to return a list of objects
+  //splitting the story.txt into objects of words
+  // let newArray=rawStory.replace(/[^A-Za-z0-9-[]]+/g,"").trim().split(" ");
+  
+  let newArray=rawStory.split(" ");
+  console.log(newArray);
+  
+  var listOfObjects=[];
+newArray.forEach(function (entry) {
+    var singleObj = {};
+    let word = entry.replace(/\[n]|\[v]|\[a]+/g, "");
+    singleObj["word"] = word;
+    console.log(singleObj)
+
+    
+    let letterN = /[[n]]/;
+    let letterV = /[[v]]/;
+    let letterA = /[[a]]/;
+
+    if (letterN.test(entry) == true) {
+      singleObj["pos"] = "noun";
+    }
+    if (letterV.test(entry) == true) {
+      singleObj["pos"] = "verb";
+    }
+    if (letterA.test(entry) == true) {
+      singleObj["pos"] = "adj";
+    } else singleObj["pos"];
+
+    listOfObjects.push(singleObj);
+  
+  })
+  console.log(listOfObjects)
+
+  // console.log(rawStory);
   // Your code here.
-  return {}; // This line is currently wrong :)
+  return listOfObjects; // This line is currently wrong :)
 }
 
 /**
@@ -46,4 +81,74 @@ getRawStory()
   .then(parseStory)
   .then((processedStory) => {
     console.log(processedStory);
+    //  calling the divs by class names 
+    const previewInput=document.querySelector(".madLibsPreview")
+    const editInput=document.querySelector(".madLibsEdit")
+
+    processedStory.forEach((processedStory)=>{
+      if(processedStory.pos != null){
+        const input=document.createElement("input");
+        input.setAttribute("maxlength","20");
+        input.setAttribute("type","text");
+        const inputSpan=document.createElement("span");
+        inputSpan.innerText= " ";
+        const outputspan=document.createElement("span");
+        outputspan.innerText=" ";
+        const output=document.createElement("input");
+        output.setAttribute("maxlength","20");
+        output.setAttribute("type","text");
+        editInput.appendChild(inputSpan);
+        editInput.appendChild(input);
+
+        input.placeholder = " " + processedStory.pos;
+
+        // make the selection equal to the current object
+        input.select();
+
+        previewInput.appendChild(outputspan);
+        previewInput.appendChild(output);
+        output.placeholder= " " + processedStory.pos;
+
+        input.select();
+
+        input.addEventListener("input",(e)=>{
+          output.innerHTML=input.value;
+          if(input.value){
+            input.setAttribute("class", "inputFilled")
+          }else{
+            input.removeAttribute("class","inputFilled")
+          }
+        })
+        input.addEventListener("input",(e)=>{
+          output.value=input.value;
+        })
+
+        const inputs=document.querySelectorAll("input");
+
+        for(let i=0;i<inputs.length;i++){
+          inputs[i].addEventListener("keypress",(e)=>{
+            if(e.key==="Enter"){
+              if(i===inputs.length-1){
+                inputs[0].focus();
+              }else{
+                inputs[i+1].focus();
+              }
+            }
+          })
+        }
+        
+        
+      }else{
+        let inputWord=document.createElement("span");
+        inputWord.innerText=`${processedStory.word} `;
+        editInput.appendChild(inputWord);
+
+        let outputWord=document.createElement("span");
+        outputWord.innerText=`${processedStory.word}  `
+        previewInput.appendChild(outputWord);
+      }
+
+      console.log(processedStory.word);
+    })
+
   });
